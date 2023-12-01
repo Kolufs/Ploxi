@@ -70,7 +70,7 @@ impl Authenticator for UserPassAuth {
         );
 
         let answer: [u8; 2];
-        match name.to_string() == self.username && password.to_string() == self.password {
+        match name == self.username && password == self.password {
             true => {
                 answer = [0x01, 0x00];
                 comm.write_all(&answer)?;

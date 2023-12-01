@@ -154,7 +154,6 @@ impl<A: Authenticator> Socks5Comm<A> {
                             },
                             Addr::Domain((_, _)) => {
                                 debug!("Got domain as address on bind ");
-                                return
                             },
                         } 
                     }
@@ -189,16 +188,16 @@ impl<A: Authenticator> Socks5Comm<A> {
         ", ver, nauth, auth);
 
         let answer: [u8; 2];
-        if auth.contains(&(A::METHOD as u8)) {
-            answer = [0x05, A::METHOD as u8];
+        if auth.contains(&{ A::METHOD }) {
+            answer = [0x05, A::METHOD];
             self.socket.write_all(&answer)?;
             debug!("Greeting Ok");
-            return Ok(());
+            Ok(())
         } else {
             answer = [0x05, 0xff];
             self.socket.write_all(&answer)?;
             debug!("Greeting Fail"); 
-            return Err(Socks5Error::NonSupportedAuth);
+            Err(Socks5Error::NonSupportedAuth)
         }
     }
 
@@ -304,14 +303,14 @@ impl<A: Authenticator> Socks5Comm<A> {
         let mut source_tx = source_rx.try_clone()?;
 
         thread::spawn(move || {
-            return std::io::copy(&mut target_tx, &mut source_rx);
+            std::io::copy(&mut target_tx, &mut source_rx)
         });
         
         std::io::copy(&mut source_tx, &mut target_rx)?;
         
         info!("Ending socks connection from {}", addr);
 
-        return Ok(());
+        Ok(())
     }
 
     fn connect(self, addr: Addr) -> SocksResult<()> {
